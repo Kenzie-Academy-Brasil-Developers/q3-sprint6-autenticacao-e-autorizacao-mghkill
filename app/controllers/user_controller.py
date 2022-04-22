@@ -53,7 +53,7 @@ def login_user():
 
         output_token = create_access_token(user_by_email)
 
-        return {"token": output_token}
+        return {"access_token": output_token}
 
     except KeyError:
         return {"Error": "Incorrect format key"}, HTTPStatus.BAD_REQUEST

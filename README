@@ -1,2 +1,85 @@
 CRUD de usuário
 
+
+POST /api/signup - Rota responsável pelo CADASTRO do usuário.
+
+Não necessita de AUTORIZAÇÃO por token -
+
+Corpo da requisição:
+
+{
+    "name": "John",
+    "last_name": "Wick",
+    "email": "johnwick@gmail.com",
+    "password": "BabaYaga"
+}
+
+Corpo da resposta:
+
+{
+    "name": "John",
+    "last_name": "Wick",
+    "email": "johnwick@gmail.com"
+}
+
+
+---------------------------------------------------------------
+
+
+POST /api/signin - Rota responsável pelo LOGIN do usuário.
+
+
+Não necessita de AUTORIZAÇÃO por token -
+
+Corpo da requisição:
+
+{
+    "email": "johnwick@gmail.com",
+    "password": "BabaYaga"
+}
+
+Corpo da resposta:
+
+{
+    "token": "370e63d575b6c1bfb973b0b61047dae3"
+}
+
+
+---------------------------------------------------------------
+
+
+PUT /api - rota responsável pela ATUALIZAÇÃO de todas as informações do usuário.
+
+Rota necessita de AUTORIZAÇÃO por token -
+ 
+
+Corpo da requisição:
+
+{
+    "name": "John",
+    "last_name": "Wick II",
+    "email": "johnwick@gmail.com",
+    "password": "Matrix"
+}
+
+
+Corpo da resposta:
+
+{
+    "name": "John",
+    "last_name": "Wick II",
+    "email": "johnwick@gmail.com"
+}
+
+
+---------------------------------------------------------------
+
+
+DELETE /api - Rota responsável por deletar as informações do usuário.
+
+Rota necessita de AUTORIZAÇÃO por token -
+
+Corpo da resposta:
+{
+    "msg": "User John has been deleted."
+}
