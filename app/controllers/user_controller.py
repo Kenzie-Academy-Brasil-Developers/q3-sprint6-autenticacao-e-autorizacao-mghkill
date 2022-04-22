@@ -4,8 +4,8 @@ from sqlalchemy.exc import IntegrityError
 from app.models.user_model import UserModel
 from app.configs.database import db
 from sqlalchemy.orm.session import Session
-from app.configs.auth import auth
 import secrets
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 
 
 
@@ -13,8 +13,6 @@ def create_user():
 
     data = request.get_json()
     try:
-        data["api_key"] = secrets.token_urlsafe(64)
-
         user: UserModel = UserModel(**data)
         
         db.session.add(user)
@@ -34,76 +32,82 @@ def create_user():
 def login_user():
     data = request.get_json()
 
-    email = data["email"]
+    try:
+        email = data["email"]
 
-    password = data["password"]
+        password = data["password"]
 
-    session: Session = db.session
+        session: Session = db.session
 
-    query =  session.query(UserModel)
-    
-    user_by_email = query.filter(UserModel.email == email).first()   
+        query =  session.query(UserModel)
+        
+        user_by_email = query.filter(UserModel.email == email).first()   
 
-    if not user_by_email:
-        return {"Error": "User not found"}, HTTPStatus.NOT_FOUND
+        if not user_by_email:
+            return {"Error": "User not found"}, HTTPStatus.NOT_FOUND
 
-    allowed = user_by_email.check_password(password)
+        allowed = user_by_email.check_password(password)
 
-    if not allowed:
-        return {"Error": "Invalid password"}, HTTPStatus.NOT_FOUND
+        if not allowed:
+            return {"Error": "Invalid password"}, HTTPStatus.NOT_FOUND
 
-    api_key = user_by_email.api_key
+        output_token = create_access_token(user_by_email)
 
-    return {"api_key": api_key}
+        return {"token": output_token}
+
+    except KeyError:
+        return {"Error": "Incorrect format key"}, HTTPStatus.BAD_REQUEST
 
 
-
-@auth.login_required
+@jwt_required()
 def read_user():
 
-    current_user = auth.current_user()
+    current_user = get_jwt_identity()
 
     return jsonify(current_user)
 
 
 
-@auth.login_required
+@jwt_required()
 def update_user():
+
     data = request.get_json()
+    try:
 
-    email = data["email"]
+        email = data["email"]
 
-    name = data["name"]
+        name = data["name"]
 
-    last_name = data["last_name"]
+        last_name = data["last_name"]
 
-    password = data["password"]
+        password = data["password"]
 
-    session: Session = db.session
+        session: Session = db.session
 
-    
-    output_user = session.query(UserModel).filter(UserModel.email == email).first()   
-
-
-    if not output_user:
-        return {"Error": "Email not found"}, HTTPStatus.NOT_FOUND
-
-    output_user.name = name
-    output_user.last_name = last_name
-    output_user.password = password
-    
-    return jsonify(output_user)
+        
+        output_user = session.query(UserModel).filter(UserModel.email == email).first()   
 
 
+        if not output_user:
+            return {"Error": "Email not found"}, HTTPStatus.NOT_FOUND
+
+        output_user.name = name
+        output_user.last_name = last_name
+        output_user.password = password
+        
+        return jsonify(output_user)
+    except KeyError:
+        return {"Error": "Incorrect format key"}, HTTPStatus.BAD_REQUEST
 
 
-@auth.login_required
+
+@jwt_required()
 def delete_user():
 
-    current_user = auth.current_user()
+    current_user = get_jwt_identity()
 
-    email = current_user.email
-
+    email = current_user["email"]
+    
     session: Session = db.session
 
     output_delete_user = session.query(UserModel).filter(UserModel.email == email).first()   
